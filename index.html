@@ -8,11 +8,9 @@
 	  stroke: steelblue;
 	  stroke-width: 2px;
 	}
-
-	.node {
-	  font: 10px sans-serif;
-	}
-
+    .node {
+      font-size: 11px;
+    }
 	circle:hover{
 	  fill:orange;
 	}
@@ -30,11 +28,18 @@
 	   padding: 2px;
 	   font-size: 14px;
 	   pointer-events: none;
-	   font-family: sans-serif;
 	  }
 
 	
     </style>
+
+<h1>Main Cast of Game of Thrones</h1>
+<p>The main cast list is downloaded from <a href="https://en.wikipedia.org/wiki/List_of_Game_of_Thrones_characters">wiki</a>. Based on my understanding of the show, edited the relationships among the main cast and used d3 radial <a href="https://github.com/d3/d3/wiki/Tree-Layout">tree layout</a> for visualization.
+
+<div id="filter_house">
+    <b>House</b>
+</div>
+<button id="reset_button"type="reset" value="Reset">Reset</button>
 
   </head>
 
@@ -45,7 +50,7 @@
 	
 <script>
 
-var diameter = 1000;
+var diameter = 800;
 
 var tree = d3.layout.tree()
     .size([360, diameter / 2 - 120])
@@ -56,10 +61,10 @@ var diagonal = d3.svg.diagonal.radial()
 
 var svg = d3.select("body").append("svg")
     //.style('position', 'fixed')
-    .style('top', '5px')
-    .style('left', '350px')
+    //.style('top', '5px')
+    //.style('left', '350px')
     .attr("width", diameter)
-    .attr("height", diameter - 150)
+    .attr("height", diameter - 100)
   .append("g")
     .attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
 
@@ -83,7 +88,7 @@ var div = d3.select("body").append("div")
         "parent": "Tyrion Lannister"
     }, 
     {
-        "actor": "Lena Headey1", 
+        "actor": "Lena Headey", 
         "house": "House Lannister", 
         "name": "Cersei Lannister", 
         "parent": "Tyrion Lannister"
@@ -161,7 +166,7 @@ var div = d3.select("body").append("div")
         "parent": "Ned Stark"
     }, 
     {
-        "actor": "Sean Bean2", 
+        "actor": "Sean Bean", 
         "house": "House Stark", 
         "name": "Ned Stark", 
         "parent": "Jon Snow"
@@ -221,13 +226,13 @@ var div = d3.select("body").append("div")
         "parent": "Robert Baratheon"
     }, 
     {
-        "actor": "Dean-Charles Chapman3", 
+        "actor": "Dean-Charles Chapman", 
         "house": "House Baratheon", 
         "name": "Tommen Baratheon", 
         "parent": "Robert Baratheon"
     }, 
     {
-        "actor": "Tom Wlaschiha4", 
+        "actor": "Tom Wlaschiha", 
         "house": "Not Applicable", 
         "name": "Jaqen H'ghar", 
         "parent": "Arya Stark"
@@ -305,7 +310,7 @@ var div = d3.select("body").append("div")
         "parent": "Roose Bolton"
     }, 
     {
-        "actor": "Michiel Huisman5", 
+        "actor": "Michiel Huisman", 
         "house": "Not Applicable", 
         "name": "Daario Naharis", 
         "parent": "Daenerys Targaryen"
@@ -330,7 +335,8 @@ var div = d3.select("body").append("div")
     }
 ];
  
- // *********** Convert flat data into a nice tree ***************
+// In courtesy of https://gist.github.com/d3noob/8329404, you can generate 
+// a tree array from flat data.  
 // create a name: node map
 var dataMap = data.reduce(function(map, node) {
     map[node.name] = node;
@@ -339,57 +345,31 @@ var dataMap = data.reduce(function(map, node) {
 
 // create the tree array
 var treeData = [];
+var houseData = [];
 data.forEach(function(node) {
     // add to parent
     var parent = dataMap[node.parent];
+    var house = node.house;
+
     if (parent) {
         // create child array if it doesn't exist
         (parent.children || (parent.children = []))
         // add node to child array
         .push(node);
     } else {
-    // parent is null or missing
-    treeData.push(node);
+        // parent is null or missing
+        treeData.push(node);
     }
+
+    if (houseData.indexOf(house) < 0) { houseData.push(house)}
+
 });
-
  
-var root = treeData[0];
- 
- /*
- var locations = root.locations;
-  var teams = root.teams;
-  var managers = root.managers;
-  var directors = root.directors;
-  var roles = root.roles;
+var root = treeData[0], 
+    nodes = tree.nodes(root),
+    links = tree.links(nodes);
 
-
-  function makeFilter(selectItem, name_list, list_object) {
-     var dropDown = d3.select(selectItem).append("select")
-                    .attr("name", name_list);
-      var options = dropDown.selectAll("option")
-               .data(["All"].concat(list_object))
-             .enter()
-               .append("option");
-
-    options.text(function (d) { return d; })
-         .attr("value", function (d) { return d; }); 
-
-      return dropDown;
-
-  }
-
-  var dropDownLocation = makeFilter("#filter_location", 'location-list', locations);
-  var dropDownTeam = makeFilter("#filter_team", 'team-list', teams);
-  var dropDownManager = makeFilter("#filter_manager", 'manager-list', managers);
-  var dropDownDirector = makeFilter("#filter_director", 'director-list', directors);
-  var dropDownRole = makeFilter("#filter_role", 'role-list', roles);
-
-*/
-  var nodes = tree.nodes(root),
-      links = tree.links(nodes);
-
-  var link = svg.selectAll(".link")
+var link = svg.selectAll(".link")
       .data(links)
     .enter().append("path")
       .attr("class", "link")
@@ -438,7 +418,53 @@ var root = treeData[0];
       .attr("transform", function(d) { return d.x < 180 ? "translate(8)" : "rotate(180)translate(-8)"; })
       .text(function(d) { return d.name; });
 
-  
+
+ //Function to create filters.
+  function makeFilter(selectItem, name_list, list_object) {
+     var dropDown = d3.select(selectItem).append("select")
+                    .attr("name", name_list);
+      var options = dropDown.selectAll("option")
+               .data(["All"].concat(list_object))
+             .enter()
+               .append("option");
+
+    options.text(function (d) { return d; })
+         .attr("value", function (d) { return d; }); 
+
+      return dropDown;
+
+  }
+  //Instantiate house filter
+  var dropDownHouse = makeFilter("#filter_house", 'house-list', houseData);
+
+  // Filters to control which circles to show.
+  function filterMethod() {
+
+    var house = dropDownHouse[0][0].value;
+
+    svg.selectAll(".circles")
+        .filter(function(d) {return house != d.house ;})
+        .attr("display", 'none');
+        
+    svg.selectAll(".circles")
+        .filter(function(d) {return (house == "All" || house  == d.house);})
+        .attr("display", 'inline');
+
+};
+
+dropDownHouse.on("change", filterMethod);
+
+ // Add reset button.
+ var reset_filters = d3.select("#reset_button");
+
+  reset_filters.on('click', function(){
+      dropDownHouse[0][0].value = 'All';
+
+      svg.selectAll(".circles")
+          .attr("display", 'inline');
+
+
+  });
 
 
 </script>
