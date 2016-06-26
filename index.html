@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <style>
+	.node circle {
+	  fill: #fff;
+	  stroke: steelblue;
+	  stroke-width: 2px;
+	}
+    .node {
+      font-size: 11px;
+    }
+	circle:hover{
+	  fill:orange;
+	}
+	.link {
+	  fill: none;
+	  stroke: #ccc;
+	  stroke-width: 1.5px;
+	}
+
+	div.tooltip {
+	   position: absolute;
+	   text-align: left;
+	   width: 300px;
+	   height: 25px
+	   padding: 2px;
+	   font-size: 14px;
+	   pointer-events: none;
+	  }
+
+	
+    </style>
+
+<h1>Main Cast of Game of Thrones</h1>
+<p>The main cast list is downloaded from <a href="https://en.wikipedia.org/wiki/List_of_Game_of_Thrones_characters">wiki</a>. Based on my understanding of the show, edited the relationships among the main cast and used d3 radial <a href="https://github.com/d3/d3/wiki/Tree-Layout">tree layout</a> for visualization.
+
+<div id="filter_house">
+    <b>House</b>
+</div>
+<button id="reset_button"type="reset" value="Reset">Reset</button>
+
+  </head>
+
+  <body>
+
+<!-- load the d3.js library -->	
+<script src="http://d3js.org/d3.v3.min.js"></script>
+	
+<script>
+
+var diameter = 800;
+
+var tree = d3.layout.tree()
+    .size([360, diameter / 2 - 120])
+    .separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
+
+var diagonal = d3.svg.diagonal.radial()
+    .projection(function(d) { return [d.y, d.x / 180 * Math.PI]; });
+
+var svg = d3.select("body").append("svg")
+    //.style('position', 'fixed')
+    //.style('top', '5px')
+    //.style('left', '350px')
+    .attr("width", diameter)
+    .attr("height", diameter - 100)
+  .append("g")
+    .attr("transform", "translate(" + diameter / 2 + "," + diameter / 2 + ")");
+
+//define tooltip
+var div = d3.select("body").append("div")
+ .attr("class", "tooltip")
+ //.style('background', '#E0E0E0')
+ //.style("opacity", 1.0);
+
+ var data = [
+    {
+        "actor": "Peter Dinklage", 
+        "house": "House Lannister", 
+        "name": "Tyrion Lannister", 
+        "parent": "Daenerys Targaryen"
+    }, 
+    {
+        "actor": "Nikolaj Coster-Waldau", 
+        "house": "House Lannister", 
+        "name": "Jaime Lannister", 
+        "parent": "Tyrion Lannister"
+    }, 
+    {
+        "actor": "Lena Headey", 
+        "house": "House Lannister", 
+        "name": "Cersei Lannister", 
+        "parent": "Tyrion Lannister"
+    }, 
+    {
+        "actor": "Emilia Clarke", 
+        "house": "House Targaryen", 
+        "name": "Daenerys Targaryen", 
+        "parent": "null"
+    }, 
+    {
+        "actor": "Kit Harington", 
+        "house": "House Stark", 
+        "name": "Jon Snow", 
+        "parent": "Daenerys Targaryen"
+    }, 
+    {
+        "actor": "Aidan Gillen", 
+        "house": "Not Applicable", 
+        "name": "Petyr Baelish", 
+        "parent": "Sansa Stark"
+    }, 
+    {
+        "actor": "Iain Glen", 
+        "house": "House Mormont", 
+        "name": "Jorah Mormont", 
+        "parent": "Daenerys Targaryen"
+    }, 
+    {
+        "actor": "Sophie Turner", 
+        "house": "House Stark", 
+        "name": "Sansa Stark", 
+        "parent": "Sansa Stark"
+    }, 
+    {
+        "actor": "Maisie Williams", 
+        "house": "House Stark", 
+        "name": "Arya Stark", 
+        "parent": "Arya Stark"
+    }, 
+    {
+        "actor": "Alfie Allen", 
+        "house": "House Greyjoy", 
+        "name": "Theon Greyjoy", 
+        "parent": "Roose Bolton"
+    }, 
+    {
+        "actor": "Isaac Hempstead Wright", 
+        "house": "House Stark", 
+        "name": "Bran Stark", 
+        "parent": "Bran Stark"
+    }, 
+    {
+        "actor": "Rory McCann", 
+        "house": "House Clegane", 
+        "name": "Sandor Clegane", 
+        "parent": "Cersei Lannister"
+    }, 
+    {
+        "actor": "Jack Gleeson", 
+        "house": "House Baratheon", 
+        "name": "Joffrey Baratheon", 
+        "parent": "Cersei Lannister"
+    }, 
+    {
+        "actor": "Michelle Fairley", 
+        "house": "House Stark", 
+        "name": "Catelyn Stark", 
+        "parent": "Ned Stark"
+    }, 
+    {
+        "actor": "Richard Madden", 
+        "house": "House Stark", 
+        "name": "Robb Stark", 
+        "parent": "Ned Stark"
+    }, 
+    {
+        "actor": "Sean Bean", 
+        "house": "House Stark", 
+        "name": "Ned Stark", 
+        "parent": "Jon Snow"
+    }, 
+    {
+        "actor": "Mark Addy", 
+        "house": "House Baratheon", 
+        "name": "Robert Baratheon", 
+        "parent": "Cersei Lannister"
+    }, 
+    {
+        "actor": "Harry Lloyd", 
+        "house": "House Targaryen", 
+        "name": "Viserys Targaryen", 
+        "parent": "Daenerys Targaryen"
+    }, 
+    {
+        "actor": "Conleth Hill", 
+        "house": "Not Applicable", 
+        "name": "Varys", 
+        "parent": "Tyrion Lannister"
+    }, 
+    {
+        "actor": "John Bradley", 
+        "house": "House Tarly", 
+        "name": "Samwell Tarly", 
+        "parent": "Jon Snow"
+    }, 
+    {
+        "actor": "Jerome Flynn", 
+        "house": "Not Applicable", 
+        "name": "Bronn", 
+        "parent": "Jamie Lannister"
+    }, 
+    {
+        "actor": "Charles Dance", 
+        "house": "House Lannister", 
+        "name": "Tywin Lannister", 
+        "parent": "Cersei Lannister"
+    }, 
+    {
+        "actor": "Sibel Kekilli", 
+        "house": "Not Applicable", 
+        "name": "Shae", 
+        "parent": "Tyrion Lannister"
+    }, 
+    {
+        "actor": "James Cosmo", 
+        "house": "House Mormont", 
+        "name": "Jeor Mormont", 
+        "parent": "Jon Snow"
+    }, 
+    {
+        "actor": "Joe Dempsie", 
+        "house": "House Baratheon", 
+        "name": "Gendry", 
+        "parent": "Robert Baratheon"
+    }, 
+    {
+        "actor": "Dean-Charles Chapman", 
+        "house": "House Baratheon", 
+        "name": "Tommen Baratheon", 
+        "parent": "Robert Baratheon"
+    }, 
+    {
+        "actor": "Tom Wlaschiha", 
+        "house": "Not Applicable", 
+        "name": "Jaqen H'ghar", 
+        "parent": "Arya Stark"
+    }, 
+    {
+        "actor": "Jason Momoa", 
+        "house": "Not Applicable", 
+        "name": "Khal Drogo", 
+        "parent": "Daenerys Targaryen"
+    }, 
+    {
+        "actor": "Liam Cunningham", 
+        "house": "House Baratheon", 
+        "name": "Davos Seaworth", 
+        "parent": "Stannis Baratheon"
+    }, 
+    {
+        "actor": "Carice van Houten", 
+        "house": "Not Declared", 
+        "name": "Melisandre", 
+        "parent": "Stannis Baratheon"
+    }, 
+    {
+        "actor": "Natalie Dormer", 
+        "house": "House Tyrell", 
+        "name": "Margaery Tyrell", 
+        "parent": "Cersei Lannister"
+    }, 
+    {
+        "actor": "Stephen Dillane", 
+        "house": "House Baratheon", 
+        "name": "Stannis Baratheon", 
+        "parent": "Jon Snow"
+    }, 
+    {
+        "actor": "Rose Leslie", 
+        "house": "Wildlings", 
+        "name": "Ygritte", 
+        "parent": "Jon Snow"
+    }, 
+    {
+        "actor": "Oona Chaplin", 
+        "house": "House Stark", 
+        "name": "Talisa Stark", 
+        "parent": "Robert Stark"
+    }, 
+    {
+        "actor": "Gwendoline Christie", 
+        "house": "House Tarth", 
+        "name": "Brienne of Tarth", 
+        "parent": "Sansa Stark"
+    }, 
+    {
+        "actor": "Hannah Murray", 
+        "house": "Wildlings", 
+        "name": "Gilly", 
+        "parent": "Samwell Tarly"
+    }, 
+    {
+        "actor": "Michael McElhatton", 
+        "house": "House Bolton", 
+        "name": "Roose Bolton", 
+        "parent": "Jon Snow"
+    }, 
+    {
+        "actor": "Kristofer Hivju", 
+        "house": "Wildlings", 
+        "name": "Tormund Giantsbane", 
+        "parent": "Jon Snow"
+    }, 
+    {
+        "actor": "Iwan Rheon", 
+        "house": "House Bolton", 
+        "name": "Ramsay Bolton", 
+        "parent": "Roose Bolton"
+    }, 
+    {
+        "actor": "Michiel Huisman", 
+        "house": "Not Applicable", 
+        "name": "Daario Naharis", 
+        "parent": "Daenerys Targaryen"
+    }, 
+    {
+        "actor": "Nathalie Emmanuel", 
+        "house": "Not Applicable", 
+        "name": "Missandei", 
+        "parent": "Daenerys Targaryen"
+    }, 
+    {
+        "actor": "Indira Varma", 
+        "house": "House Martell", 
+        "name": "Ellaria Sand", 
+        "parent": "Cersei Lannister"
+    }, 
+    {
+        "actor": "Jonathan Pryce", 
+        "house": "Not Applicable", 
+        "name": "The High Sparrow", 
+        "parent": "Cersei Lannister"
+    }
+];
+ 
+// In courtesy of https://gist.github.com/d3noob/8329404, you can generate 
+// a tree array from flat data.  
+// create a name: node map
+var dataMap = data.reduce(function(map, node) {
+    map[node.name] = node;
+    return map;
+}, {});
+
+// create the tree array
+var treeData = [];
+var houseData = [];
+data.forEach(function(node) {
+    // add to parent
+    var parent = dataMap[node.parent];
+    var house = node.house;
+
+    if (parent) {
+        // create child array if it doesn't exist
+        (parent.children || (parent.children = []))
+        // add node to child array
+        .push(node);
+    } else {
+        // parent is null or missing
+        treeData.push(node);
+    }
+
+    if (houseData.indexOf(house) < 0) { houseData.push(house)}
+
+});
+ 
+var root = treeData[0], 
+    nodes = tree.nodes(root),
+    links = tree.links(nodes);
+
+var link = svg.selectAll(".link")
+      .data(links)
+    .enter().append("path")
+      .attr("class", "link")
+      .attr("d", diagonal);
+
+  var node = svg.selectAll(".node")
+      .data(nodes)
+    .enter().append("g")
+      .attr("class", "node")
+      .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + d.y + ")"; })
+
+  //Add circle to each node.
+  node.append("circle")
+    .attr('class', 'circles')
+      .attr("r", 4.5)
+      .on("mouseover", function(d) {
+
+        var name = d.name, 
+            house= d.house,
+            actor = d.actor;
+
+        div.transition().duration(100)
+           .style("opacity", 1);
+
+        var left_margin = 50,
+            top_margin = 450;
+
+        div.text("Name: " + name)
+                .style("left", left_margin + "px")
+                .style("top", top_margin + "px")
+              .append("p") 
+                .text("House: " + house)
+                .style("left", left_margin + "px")
+                .style("top", top_margin + 10*1 + "px")
+              .append("p") 
+                .text("Actor: " + actor)
+                .style("left", left_margin + "px")
+                .style("top", top_margin + 10*2 + "px")
+          
+      })
+
+  //Add name labels to each circle
+  node.append("text")
+      .attr("dy", ".31em")
+      .attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
+      .attr("transform", function(d) { return d.x < 180 ? "translate(8)" : "rotate(180)translate(-8)"; })
+      .text(function(d) { return d.name; });
+
+
+ //Function to create filters.
+  function makeFilter(selectItem, name_list, list_object) {
+     var dropDown = d3.select(selectItem).append("select")
+                    .attr("name", name_list);
+      var options = dropDown.selectAll("option")
+               .data(["All"].concat(list_object))
+             .enter()
+               .append("option");
+
+    options.text(function (d) { return d; })
+         .attr("value", function (d) { return d; }); 
+
+      return dropDown;
+
+  }
+  //Instantiate house filter
+  var dropDownHouse = makeFilter("#filter_house", 'house-list', houseData);
+
+  // Filters to control which circles to show.
+  function filterMethod() {
+
+    var house = dropDownHouse[0][0].value;
+
+    svg.selectAll(".circles")
+        .filter(function(d) {return house != d.house ;})
+        .attr("display", 'none');
+        
+    svg.selectAll(".circles")
+        .filter(function(d) {return (house == "All" || house  == d.house);})
+        .attr("display", 'inline');
+
+};
+
+dropDownHouse.on("change", filterMethod);
+
+ // Add reset button.
+ var reset_filters = d3.select("#reset_button");
+
+  reset_filters.on('click', function(){
+      dropDownHouse[0][0].value = 'All';
+
+      svg.selectAll(".circles")
+          .attr("display", 'inline');
+
+
+  });
+
+
+</script>
+	
+  </body>
+</html>
