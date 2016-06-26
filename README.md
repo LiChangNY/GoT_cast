@@ -1,4 +1,4 @@
-# d3_radial_tree
+# Game of Thrones Main Cast
 Used D3 radial tree layout for visualizing the main cast of Game of Thrones. 
 
 ##TODO
